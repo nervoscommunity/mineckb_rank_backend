@@ -11,8 +11,9 @@ class HomeController extends Controller {
 
     const list = await service.block.getRecords();
     const total = list.length;
+    const epoch = await service.block.getEpoch(0);
 
-    ctx.body = { total, list };
+    ctx.body = { total, list, epoch };
   }
 
   async init() {

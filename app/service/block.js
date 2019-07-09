@@ -82,14 +82,19 @@ class BlockService extends Service {
     let i = 1;
     const res = [];
     while (i <= parseInt(cur.number)) {
-      const e = await ckb.rpc.getEpochByNumber(i);
-      const b = await ckb.rpc.getBlockByNumber(e.startNumber);
-      const lucky = ckb.utils.bech32Address(b.transactions[0].witnesses[0].data[1]);
-      res.push({ ...e, lucky });
+      const e = await this.getEpoch(i);
+      res.push(e);
       i++;
     }
 
     return res;
+  }
+
+  async getEpoch(which) {
+    const e = which ? await ckb.rpc.getEpochByNumber(which) : await ckb.rpc.getCurrentEpoch();
+    const b = await ckb.rpc.getBlockByNumber(e.startNumber);
+    const lucky = ckb.utils.bech32Address(b.transactions[0].witnesses[0].data[1]);
+    return { ...e, lucky };
   }
 
   async getRecords() {
