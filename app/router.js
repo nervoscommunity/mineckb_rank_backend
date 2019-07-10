@@ -10,5 +10,4 @@ module.exports = app => {
   router.get('/addr/:blake160', controller.home.addr);
   router.get('/send', controller.home.send);
   router.get('/get/:txhash', controller.home.get);
-  router.get('/init', controller.home.init);
 };

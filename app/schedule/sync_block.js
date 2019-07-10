@@ -5,16 +5,15 @@ const Subscription = require('egg').Subscription;
 class SyncBlock extends Subscription {
   static get schedule() {
     return {
-      immediate: false,
-      disable: true,
-      interval: '10s',
+      immediate: true,
+      interval: '15s',
       type: 'all',
     };
   }
 
   async subscribe() {
     const { service } = this;
-    await service.block.sync();
+    !service.block.isSyncing() && await service.block.sync();
   }
 }
 

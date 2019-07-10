@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@nervosnetwork/ckb-sdk-core": "^0.15.0",
+    "bignumber.js": "^9.0.0",
     "bn.js": "^4.11.8",
     "egg": "^2.15.1",
     "egg-cors": "^2.2.0",

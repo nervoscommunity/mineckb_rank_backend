@@ -3,9 +3,11 @@
 const CKBCore = require('@nervosnetwork/ckb-sdk-core').default;
 const nodeRpcUrl = 'http://api.yamen.co:8114';
 const ckb = new CKBCore(nodeRpcUrl);
-const BN = require('bn.js');
+const BN = require('bignumber.js');
 
 const Service = require('egg').Service;
+
+let syncing = false;
 
 /*
 const mineckb_addrs = [
@@ -17,7 +19,13 @@ const mineckb_addrs = [
 
 class BlockService extends Service {
 
+  isSyncing() {
+    return syncing;
+  }
+
   async sync() {
+
+    syncing = true;
 
     const { app } = this;
     const { rpc, utils } = ckb;
@@ -30,6 +38,7 @@ class BlockService extends Service {
 
     if (tip === height.toString()) {
       console.log('skipped');
+      syncing = false;
       return;
     }
 
@@ -49,6 +58,7 @@ class BlockService extends Service {
         records[index].amount = new BN(amount).add(new BN(records[index].amount)).toString();
         records[index].blocks += 1;
       }
+
       reward = new BN(amount).add(new BN(reward)).toString();
 
       console.log('[ Height ]: ' + i + ' [ Reward ]: ' + reward);
@@ -64,15 +74,11 @@ class BlockService extends Service {
       await app.mysql.insert('records', records[i]);
     }
 
-    /*
-    if (height === 0) {
-      await app.runSchedule('sync_blocks');
-    }
-    */
-
     height = tip;
     await this.setTip(height, reward);
     console.log('to: ', height);
+
+    syncing = false;
   }
 
   async getEpochs() {
@@ -98,7 +104,16 @@ class BlockService extends Service {
   }
 
   async getRecords() {
-    return await this.app.mysql.select('records', { orders: [[ 'rank', 'asc' ]] });
+    const records = await this.app.mysql.select('records', { orders: [[ 'rank', 'asc' ]] });
+    const { reward } = await this.getTip();
+    const rewardBN = new BN(reward);
+    const bonus = new BN(2000000);
+
+    for (let i = 0; i < records.length; i++) {
+      const amountBN = new BN(records[i].amount);
+      records[i].exp = amountBN.lt(new BN(4000)) ? '0' : amountBN.div(rewardBN).times(bonus).toFixed(4);
+    }
+    return records;
   }
 
   async getTip() {
