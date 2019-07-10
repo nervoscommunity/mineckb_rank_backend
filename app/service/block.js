@@ -36,6 +36,7 @@ class BlockService extends Service {
 
     const tip = await ckb.rpc.getTipBlockNumber();
 
+
     if (tip === height.toString()) {
       console.log('skipped');
       syncing = false;
@@ -43,6 +44,7 @@ class BlockService extends Service {
     }
 
     let records = await app.mysql.select('records');
+
 
     for (let i = height + 1; i <= tip; i++) {
 
@@ -55,11 +57,11 @@ class BlockService extends Service {
       if (index === -1) {
         records.push({ rank: 0, addr, amount, blocks: 1 });
       } else {
-        records[index].amount = new BN(amount).add(new BN(records[index].amount)).toString();
+        records[index].amount = new BN(amount).plus(new BN(records[index].amount)).toString();
         records[index].blocks += 1;
       }
 
-      reward = new BN(amount).add(new BN(reward)).toString();
+      reward = new BN(amount).plus(new BN(reward)).toString();
 
       console.log('[ Height ]: ' + i + ' [ Reward ]: ' + reward);
     }

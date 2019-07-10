@@ -13,8 +13,9 @@ class HomeController extends Controller {
     const total = list.length;
     const epoch = await service.block.getEpoch(0);
     const tip = await service.block.getTip();
+    const epochs = await service.block.getEpochs();
 
-    ctx.body = { total, list, epoch, ...tip };
+    ctx.body = { total, list, epochs, epoch, ...tip };
   }
 
   async info() {
