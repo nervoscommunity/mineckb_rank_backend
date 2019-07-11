@@ -113,7 +113,7 @@ class BlockService extends Service {
 
     for (let i = 0; i < records.length; i++) {
       const amountBN = new BN(records[i].amount);
-      records[i].exp = amountBN.lt(new BN(4000)) ? '0' : amountBN.div(rewardBN).times(bonus).toFixed(4);
+      records[i].exp = amountBN.lt(new BN(4000*10**8)) ? '0' : amountBN.div(rewardBN).times(bonus).toFixed(4);
     }
     return records;
   }
