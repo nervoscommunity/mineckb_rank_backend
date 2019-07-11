@@ -7,15 +7,9 @@ const BN = require('bignumber.js');
 
 const Service = require('egg').Service;
 
-let syncing = false;
+const thresholdBN = new BN(4000*10**8);
 
-/*
-const mineckb_addrs = [
-  '',
-  '',
-  '',
-]
-*/
+let syncing = false;
 
 class BlockService extends Service {
 
@@ -54,14 +48,17 @@ class BlockService extends Service {
       const addr = utils.bech32Address(blake160.toString());
       const index = records.findIndex(r => r.addr === addr);
 
+      const amountBN = new BN(amount);
+      const rewardBN = new BN(reward);
+
       if (index === -1) {
         records.push({ rank: 0, addr, amount, blocks: 1 });
       } else {
-        records[index].amount = new BN(amount).plus(new BN(records[index].amount)).toString();
+        records[index].amount = amountBN.plus(new BN(records[index].amount)).toString();
         records[index].blocks += 1;
       }
 
-      reward = new BN(amount).plus(new BN(reward)).toString();
+      amountBN.gt(thresholdBN) && (reward = amountBN.plus(rewardBN).toString());
 
       console.log('[ Height ]: ' + i + ' [ Reward ]: ' + reward);
     }
@@ -113,7 +110,7 @@ class BlockService extends Service {
 
     for (let i = 0; i < records.length; i++) {
       const amountBN = new BN(records[i].amount);
-      records[i].exp = amountBN.lt(new BN(4000*10**8)) ? '0' : amountBN.div(rewardBN).times(bonus).toFixed(4);
+      records[i].exp = amountBN.lte(thresholdBN) ? '0' : amountBN.div(rewardBN).times(bonus).toFixed(4);
     }
     return records;
   }
