@@ -24,7 +24,7 @@ class BlockService extends Service {
     const { app } = this;
     const { rpc, utils } = ckb;
 
-    let { height, reward } = await this.getTip();
+    let { height } = await this.getTip();
 
     console.log('from: ', height);
 
@@ -49,7 +49,6 @@ class BlockService extends Service {
       const index = records.findIndex(r => r.addr === addr);
 
       const amountBN = new BN(amount);
-      const rewardBN = new BN(reward);
 
       if (index === -1) {
         records.push({ rank: 0, addr, amount, blocks: 1 });
@@ -58,9 +57,7 @@ class BlockService extends Service {
         records[index].blocks += 1;
       }
 
-      amountBN.gt(thresholdBN) && (reward = amountBN.plus(rewardBN).toString());
-
-      console.log('[ Height ]: ' + i + ' [ Reward ]: ' + reward);
+      console.log('[ Height ]: ' + i);
     }
 
     records = records.sort(sortBN);
@@ -68,10 +65,15 @@ class BlockService extends Service {
 
     await app.mysql.delete('records');
 
+    let rewardBN = new BN(0)
     for (let i = 0; i < total; i++) {
       records[i].rank = i + 1;
+      const amountBN = new BN(records[i].amount)
+      amountBN.gt(thresholdBN) && (rewardBN = amountBN.plus(rewardBN));
       await app.mysql.insert('records', records[i]);
     }
+    const reward = rewardBN.toString()
+    console.log('total valid reward: ', reward)
 
     height = tip;
     await this.setTip(height, reward);
