@@ -6,7 +6,7 @@ class SyncBlock extends Subscription {
   static get schedule() {
     return {
       immediate: true,
-      interval: '15s',
+      interval: '3s',
       type: 'all',
     };
   }

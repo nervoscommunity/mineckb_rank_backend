@@ -30,7 +30,6 @@ class BlockService extends Service {
 
     const tip = await ckb.rpc.getTipBlockNumber();
 
-
     if (tip === height.toString()) {
       console.log('skipped');
       syncing = false;
@@ -99,6 +98,9 @@ class BlockService extends Service {
 
   async getEpoch(which) {
     const e = which ? await ckb.rpc.getEpochByNumber(which) : await ckb.rpc.getCurrentEpoch();
+    if (e.startNumber === "0") {
+      return {...e, lucky: "pangu"}
+    }
     const b = await ckb.rpc.getBlockByNumber(e.startNumber);
     const lucky = ckb.utils.bech32Address(b.transactions[0].witnesses[0].data[1]);
     return { ...e, lucky };

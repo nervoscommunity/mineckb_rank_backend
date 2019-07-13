@@ -8,7 +8,6 @@ class HomeController extends Controller {
   async index() {
 
     const { ctx, service } = this;
-
     const list = await service.block.getRecords();
     const total = list.length;
     const epoch = await service.block.getEpoch(0);
